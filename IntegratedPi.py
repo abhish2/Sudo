@@ -52,7 +52,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(25, GPIO.IN)
 GPIO.setup(24, GPIO.OUT)
 GPIO.output(24,1)
-static="Mr Sample,9754754185,TN12KF3636,25.5941,85.1376"
+static="John_Doe,9876543210,TN12KF3636,12.82454,80.04598"
 i=1
 s="hello"
 ws=create_connection("ws://192.168.43.14:5001")
@@ -87,6 +87,7 @@ while True:
     print(res)
     if res: # if port 25 == 1
         print ("Accident Occured")
+        static= static+","+str(acci);
         ws.send(static)
     else:
         print("All Clear" )
