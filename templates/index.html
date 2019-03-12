@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Place Searches</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <div id="log"></div>
+    <script>
+     
+     var map;
+     var infowindow;
+   
+     var obj;
+     var service;
+     var pyrmont = {lat:12.82082 , lng: 80.038229};
+    function pawan()
+    {
+     //change the ipaddress to your computer's IP
+        var sock=new WebSocket("ws://192.168.43.82:5001");
+        var log = document.getElementById('log');
+        
+      
+
+           sock.onopen=function(event){
+    
+       setTimeout(function(){
+         sock.send(JSON.stringify(pyrmont));},1000);
+       };
+           sock.onmessage=function(event){
+      
+      obj=JSON.parse(event.data);
+      log.innerHTML+=obj.lat+" , "+obj.lng+"<br>";
+      
+      console.log(obj);
+     
+     initMap(obj);
+
+    }
+
+  }
+      function initMap(obj) {
+        var image='http://maps.google.com/mapfiles/kml/paddle/blu-blank.png';
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: obj,
+          zoom: 12
+        });
+        var marke = new google.maps.Marker({
+        position: obj,
+        map: map,
+        title: obj["lat"] +", "+ obj["lng"],
+        icon : image
+        });
+         var cityCircle = new google.maps.Circle({
+            strokeColor: '#0000FF',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#0000FF',
+            fillOpacity: 0.35,
+            map: map,
+            center: obj,
+            radius: 10000
+          });
+        
+        infowindow = new google.maps.InfoWindow();
+        service= new google.maps.places.PlacesService(map);
+        service.nearbySearch({
+          location: obj,
+          radius: 10000,
+          type: ['hospital']
+        }, callback);
+
+      }
+
+      function callback(results, status) {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+          for (var i = 0; i < results.length; i++) {
+            createMarker(results[i]);
+          }
+        }
+      }
+
+      function createMarker(place) {
+        var placeLoc = place.geometry.location;
+        var marker = new google.maps.Marker({
+          map: map,
+          position: place.geometry.location
+        });
+        var request = { reference: place.reference };
+    service.getDetails(request, function(details, status) {
+        google.maps.event.addListener(marker, 'click', function() {
+          infowindow.setContent('<div><b>'+place.name+'</b><br>'+details.adr_address+'<br>'+details.formatted_phone_number+'<br>'+details.website+'</div>');
+          infowindow.open(map, this);
+        });
+      });
+      }
+    </script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDPYaejVtdU70W5Ei4GSVW1-KQnA2fM6eQ&libraries=places&callback=pawan"></script>
+  </body>
+</html> 
